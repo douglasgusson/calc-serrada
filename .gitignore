@@ -3,7 +3,6 @@ nbproject/private/
 build/
 nbbuild/
 dist/
-libs/
 nbdist/
 nbactions.xml
 nb-configuration.xml
