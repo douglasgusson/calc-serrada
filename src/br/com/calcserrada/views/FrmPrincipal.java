@@ -24,9 +24,13 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Calendar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
+import org.joda.time.DateTime;
+import org.joda.time.Hours;
 
 /**
  *
@@ -397,8 +401,12 @@ public class FrmPrincipal extends javax.swing.JFrame {
         this.btNovo.setEnabled(false);
         this.btSair.setEnabled(false);
 
-        this.tfCompBr01.requestFocus();
-
+         this.tfDataInicial.setEnabled(true);
+        this.tfHrInicialSer.setEnabled(true);
+        
+        this.tfDataFinal.setEnabled(true);
+        this.tfHrFinalSer.setEnabled(true);
+     
         this.tfQuantGranalha.setEnabled(true);
 
         this.tfCompBr01.setEnabled(true);
@@ -491,6 +499,12 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         this.tfHrFinal.setBorder(new LineBorder(Color.GRAY));
         this.tfHrInicial.setBorder(new LineBorder(Color.GRAY));
+        
+        this.tfDataInicial.setEnabled(false);
+        this.tfHrInicialSer.setEnabled(false);
+        
+        this.tfDataFinal.setEnabled(false);
+        this.tfHrFinalSer.setEnabled(false);
 
         this.tfCompBr01.setEnabled(false);
         this.tfCompBr02.setEnabled(false);
@@ -507,6 +521,12 @@ public class FrmPrincipal extends javax.swing.JFrame {
         this.btNovo.setEnabled(true);
         this.btSair.setEnabled(true);
 
+        this.tfDataInicial.setDate(null);
+        this.tfHrInicialSer.setText("");
+        
+        this.tfDataFinal.setDate(null);
+        this.tfHrFinalSer.setText("");
+        
         this.tfCompBr01.setText("");
         this.tfCompBr02.setText("");
         this.tfAltBr01.setText("");
@@ -534,6 +554,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
         this.tfHrInicial.setText("");
         this.tfHrFinal.setText("");
         this.tfTotalDiferenca.setText("");
+        this.tfHorasTrabalhadas.setText("");
 
         listaGranalha.removeAll(listaGranalha);
         preencherTabelaGranalha(listaGranalha);
@@ -564,16 +585,16 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         tbGranalha.addMouseListener(
                 new java.awt.event.MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e
-                    ) {
-                        // Se o botão direito do mouse foi pressionado
-                        if (e.getButton() == MouseEvent.BUTTON3) {
-                            // Exibe o popup menu na posição do mouse.
-                            popUpMenu.show(tbGranalha, e.getX(), e.getY());
-                        }
-                    }
-                });
+            @Override
+            public void mouseClicked(MouseEvent e
+            ) {
+                // Se o botão direito do mouse foi pressionado
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    // Exibe o popup menu na posição do mouse.
+                    popUpMenu.show(tbGranalha, e.getX(), e.getY());
+                }
+            }
+        });
     }
 
     private void menuContextoTabelaParada() {
@@ -597,16 +618,16 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         tbParada.addMouseListener(
                 new java.awt.event.MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e
-                    ) {
-                        // Se o botão direito do mouse foi pressionado
-                        if (e.getButton() == MouseEvent.BUTTON3) {
-                            // Exibe o popup menu na posição do mouse.
-                            popUpMenu.show(tbParada, e.getX(), e.getY());
-                        }
-                    }
-                });
+            @Override
+            public void mouseClicked(MouseEvent e
+            ) {
+                // Se o botão direito do mouse foi pressionado
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    // Exibe o popup menu na posição do mouse.
+                    popUpMenu.show(tbParada, e.getX(), e.getY());
+                }
+            }
+        });
     }
 
     private String somaHora() {
@@ -651,6 +672,53 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
     }
 
+    private void calcularHorasTrabalhadas() {
+
+        Calendar ini = tfDataInicial.getCalendar();
+        String hrIni = tfHrInicialSer.getText();
+
+        int hIni = 0, mIni = 0, hFim = 0, mFim = 0;
+
+        try {
+            hIni = Integer.parseInt(hrIni.substring(0, hrIni.indexOf(":")));
+            mIni = Integer.parseInt(hrIni.substring(hrIni.indexOf(":") + 1));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+
+        DateTime dataInicial = new DateTime(ini.get(Calendar.YEAR),
+                ini.get(Calendar.MONTH) + 1, ini.get(Calendar.DAY_OF_MONTH),
+                hIni, mIni);
+
+        Calendar fim = tfDataFinal.getCalendar();
+
+        String hrFim = tfHrFinalSer.getText();
+
+        try {
+            hFim = Integer.parseInt(hrFim.substring(0, hrFim.indexOf(":")));
+            mFim = Integer.parseInt(hrFim.substring(hrFim.indexOf(":") + 1));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+
+        DateTime dataFinal = new DateTime(fim.get(Calendar.YEAR),
+                fim.get(Calendar.MONTH) + 1, fim.get(Calendar.DAY_OF_MONTH),
+                hFim, mFim);
+
+        Hours h = Hours.hoursBetween(dataInicial, dataFinal);
+        int trabalhadas = h.getHours();
+
+        if (!tfTotalDiferenca.getText().equals("")) {   
+            String totalParadas = tfTotalDiferenca.getText();
+            int paradas = Integer.parseInt(totalParadas.substring(0, totalParadas.indexOf(":")));
+            
+            trabalhadas -= paradas;
+        }
+        
+        tfHorasTrabalhadas.setText("" + trabalhadas);
+
+    }
+
     private String formatarDecimal(double valor) {
         DecimalFormat df = new DecimalFormat("##0.00");
         String saida = df.format(valor);
@@ -660,7 +728,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
     private void setIcon() {
         this.setIconImage(
                 new ImageIcon(getClass().getResource(
-                                "/br/com/calcserrada/img/icon.png")).getImage());
+                        "/br/com/calcserrada/img/icon.png")).getImage());
     }
 
     /**
@@ -672,6 +740,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jYearChooser1 = new com.toedter.calendar.JYearChooser();
         jPanel8 = new javax.swing.JPanel();
         lbHora = new javax.swing.JLabel();
         btCancelar = new javax.swing.JButton();
@@ -739,6 +808,15 @@ public class FrmPrincipal extends javax.swing.JFrame {
         jLabel24 = new javax.swing.JLabel();
         tfTotalDiferenca = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
+        tfHorasTrabalhadas = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        tfDataInicial = new com.toedter.calendar.JDateChooser();
+        tfHrInicialSer = new javax.swing.JFormattedTextField();
+        jPanel4 = new javax.swing.JPanel();
+        tfDataFinal = new com.toedter.calendar.JDateChooser();
+        tfHrFinalSer = new javax.swing.JFormattedTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Calculadora de Serradas");
@@ -923,7 +1001,7 @@ public class FrmPrincipal extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
+                        .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, 155, Short.MAX_VALUE)
                         .addGap(10, 10, 10))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -1219,6 +1297,21 @@ public class FrmPrincipal extends javax.swing.JFrame {
 
         jLabel10.setText("Total paradas:");
 
+        jLabel15.setText("Horas trabalhadas:");
+
+        tfHorasTrabalhadas.setEditable(false);
+        tfHorasTrabalhadas.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        tfHorasTrabalhadas.setDisabledTextColor(java.awt.Color.black);
+        tfHorasTrabalhadas.setEnabled(false);
+
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/br/com/calcserrada/img/refresh_16x16.png"))); // NOI18N
+        jButton1.setToolTipText("Atualizar total de horas trabalhadas");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
         jPanel10.setLayout(jPanel10Layout);
         jPanel10Layout.setHorizontalGroup(
@@ -1228,17 +1321,27 @@ public class FrmPrincipal extends javax.swing.JFrame {
                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
-                        .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, 129, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(tfTotalDiferenca, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
                         .addComponent(jLabel21)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(tfHrInicial, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(12, 12, 12)
                         .addComponent(jLabel24)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(tfHrFinal, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(tfHrFinal, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
+                        .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel10Layout.createSequentialGroup()
+                                .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                            .addGroup(jPanel10Layout.createSequentialGroup()
+                                .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
+                                .addGap(6, 6, 6)))
+                        .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(tfTotalDiferenca)
+                            .addGroup(jPanel10Layout.createSequentialGroup()
+                                .addComponent(tfHorasTrabalhadas, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap())
         );
         jPanel10Layout.setVerticalGroup(
@@ -1252,11 +1355,78 @@ public class FrmPrincipal extends javax.swing.JFrame {
                         .addComponent(jLabel24)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(8, 8, 8)
                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(tfTotalDiferenca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel10))
-                .addGap(20, 20, 20))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(tfHorasTrabalhadas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel15)
+                    .addComponent(jButton1)))
+        );
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Inicio da serrada"));
+
+        try {
+            tfHrInicialSer.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##:##")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(tfDataInicial, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, Short.MAX_VALUE)
+                .addComponent(tfHrInicialSer, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(tfHrInicialSer, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(tfDataInicial, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Fim da serrada"));
+
+        try {
+            tfHrFinalSer.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("##:##")));
+        } catch (java.text.ParseException ex) {
+            ex.printStackTrace();
+        }
+        tfHrFinalSer.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                tfHrFinalSerFocusLost(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(tfDataFinal, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(tfHrFinalSer, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(83, Short.MAX_VALUE))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(tfHrFinalSer, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(tfDataFinal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -1265,20 +1435,29 @@ public class FrmPrincipal extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
                         .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -1312,16 +1491,29 @@ public class FrmPrincipal extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void tfHrFinalSerFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_tfHrFinalSerFocusLost
+        // TODO add your handling code here:
+        calcularHorasTrabalhadas();
+    }//GEN-LAST:event_tfHrFinalSerFocusLost
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        calcularHorasTrabalhadas();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btCancelar;
     private javax.swing.JButton btNovo;
     private javax.swing.JButton btSair;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
@@ -1345,12 +1537,15 @@ public class FrmPrincipal extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator2;
+    private com.toedter.calendar.JYearChooser jYearChooser1;
     private javax.swing.JLabel lbHora;
     private javax.swing.JLabel lbSacos;
     private javax.swing.JTable tbGranalha;
@@ -1364,9 +1559,14 @@ public class FrmPrincipal extends javax.swing.JFrame {
     private javax.swing.JTextField tfCompBr02;
     private javax.swing.JTextField tfCompLiq01;
     private javax.swing.JTextField tfCompLiq02;
+    private com.toedter.calendar.JDateChooser tfDataFinal;
+    private com.toedter.calendar.JDateChooser tfDataInicial;
     private javax.swing.JTextField tfGranKgM2;
+    private javax.swing.JTextField tfHorasTrabalhadas;
     private javax.swing.JFormattedTextField tfHrFinal;
+    private javax.swing.JFormattedTextField tfHrFinalSer;
     private javax.swing.JFormattedTextField tfHrInicial;
+    private javax.swing.JFormattedTextField tfHrInicialSer;
     private javax.swing.JTextField tfMetrBr01;
     private javax.swing.JTextField tfMetrBr02;
     private javax.swing.JTextField tfMetrLiq01;
