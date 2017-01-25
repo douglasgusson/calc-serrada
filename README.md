@@ -2,7 +2,7 @@
 
 Sistema usado para cálculos simples em serradas de granito.
 
-Download para Windows
+CalcSerrada para Windows: 
 [Download](https://raw.githubusercontent.com/douglasgusson/calc-serrada/master/CalcSerrada.zip)
 
 ### Captura de tela
